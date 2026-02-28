@@ -1,0 +1,22 @@
+/* Fullscreen canvas */
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: #87ceeb; /* Surface sky color */
+}
+
+canvas {
+  display: block;
+}
+
+/* Beneath mode overlay */
+.beneath-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 20, 60, 0.6);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
