@@ -9,6 +9,9 @@ export function drawTiles(globals)
 
 function getImageFromTileset(globals, index)
 {
+    const x = index % 64
+    const y = Math.trunc(index / 64)
+    
 
 
 
