@@ -4,4 +4,13 @@ export function drawTiles(globals)
     const level = globals.level
 
 
+
+}
+
+function getImageFromTileset(globals, index)
+{
+
+
+
+
 }
