@@ -1,4 +1,3 @@
-/* Fullscreen canvas */
 body {
   margin: 0;
   overflow: hidden;
@@ -9,7 +8,6 @@ canvas {
   display: block;
 }
 
-/* Beneath mode overlay */
 .beneath-overlay {
   position: absolute;
   top: 0;
