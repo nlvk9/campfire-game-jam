@@ -1,67 +1,112 @@
-// Canvas setup
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 800;
+canvas.height = 600;
 
 // Game variables
-let mode = "surface"; // 'surface' or 'beneath'
-let depth = 0;
+const gravity = 0.5;
+const groundHeight = 100; // height of the ground from bottom
+let keys = {};
 
-// Player submarine
-const sub = {
-  x: canvas.width / 2,
-  y: canvas.height / 2,
-  width: 50,
-  height: 20,
+// Player
+const player = {
+  x: 100,
+  y: canvas.height - groundHeight - 50, // start on ground
+  width: 30,
+  height: 50,
   speed: 5,
+  vy: 0, // vertical velocity
+  onGround: false,
 };
 
-// Input handling
-const keys = {};
+// Submarine
+const sub = {
+  x: 600,
+  y: canvas.height - groundHeight - 30,
+  width: 60,
+  height: 30,
+  speed: 4,
+  inSub: false,
+};
+
+// Input
 window.addEventListener("keydown", (e) => (keys[e.key] = true));
 window.addEventListener("keyup", (e) => (keys[e.key] = false));
 
-// Toggle mode with Space
+// Enter submarine
 window.addEventListener("keydown", (e) => {
-  if (e.key === " ") mode = mode === "surface" ? "beneath" : "surface";
+  if (
+    e.key === "Space" &&
+    !sub.inSub &&
+    player.x + player.width > sub.x &&
+    player.x < sub.x + sub.width
+  ) {
+    sub.inSub = true;
+    player.vy = 0;
+    player.onGround = false;
+    player.x = sub.x + sub.width / 2 - player.width / 2;
+    player.y = sub.y - player.height / 2;
+  }
 });
 
 // Game loop
 function update() {
-  // Movement
-  if (keys["ArrowUp"]) sub.y -= sub.speed;
-  if (keys["ArrowDown"]) sub.y += sub.speed;
-  if (keys["ArrowLeft"]) sub.x -= sub.speed;
-  if (keys["ArrowRight"]) sub.x += sub.speed;
+  // Horizontal movement
+  if (keys["ArrowLeft"]) player.x -= player.speed;
+  if (keys["ArrowRight"]) player.x += player.speed;
 
-  // Clamp to canvas
-  sub.x = Math.max(0, Math.min(canvas.width - sub.width, sub.x));
-  sub.y = Math.max(0, Math.min(canvas.height - sub.height, sub.y));
+  // Jump
+  if (keys["ArrowUp"] && player.onGround) {
+    player.vy = -10;
+    player.onGround = false;
+  }
+
+  // Gravity
+  player.vy += gravity;
+  player.y += player.vy;
+
+  // Ground collision
+  const groundY = canvas.height - groundHeight - player.height;
+  if (player.y > groundY) {
+    player.y = groundY;
+    player.vy = 0;
+    player.onGround = true;
+  }
 
   draw();
   requestAnimationFrame(update);
 }
 
-// Draw function
+// Draw everything
 function draw() {
-  // Background
-  if (mode === "surface") {
-    ctx.fillStyle = "#87ceeb"; // light blue surface
-  } else {
-    ctx.fillStyle = "#001440"; // dark deep ocean
-  }
+  // Clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Sky
+  ctx.fillStyle = "#87ceeb";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Submarine
-  ctx.fillStyle = mode === "surface" ? "#FFD700" : "#FF4500";
+  // Ocean (right side)
+  ctx.fillStyle = "#1E90FF";
+  ctx.fillRect(500, canvas.height - groundHeight, 300, groundHeight);
+
+  // Ground
+  ctx.fillStyle = "#228B22";
+  ctx.fillRect(0, canvas.height - groundHeight, 500, groundHeight);
+
+  // Submarine (beside ocean)
+  ctx.fillStyle = "#FFD700";
   ctx.fillRect(sub.x, sub.y, sub.width, sub.height);
 
-  // Depth indicator
-  ctx.fillStyle = "#fff";
-  ctx.font = "20px Arial";
-  ctx.fillText(`Depth: ${depth} meters`, 20, 30);
-  ctx.fillText(`Mode: ${mode}`, 20, 60);
+  // Player
+  ctx.fillStyle = "#FF4500";
+  ctx.fillRect(player.x, player.y, player.width, player.height);
+
+  // Instructions
+  ctx.fillStyle = "white";
+  ctx.font = "18px Arial";
+  ctx.fillText("Arrow keys to move/jump", 20, 30);
+  ctx.fillText("Space bar to enter submarine", 20, 50);
 }
 
 // Start game
